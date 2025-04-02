@@ -1,5 +1,19 @@
 # API 상세 문서: Smartstore FAQ Chatbot
 
+🚨 **주의 사항: 반드시 Codespaces에서 실행해주세요!**  
+
+로컬 환경에서의 의존성 설치 이슈로 인해 **Codespaces에서 개발 및 구현을 진행**한 점 양해 부탁드립니다.  
+
+🛠 **Codespaces에서 실행하는 방법**  
+
+1. **저장소 페이지로 이동**  
+2. **`<> Code` 버튼 클릭**  
+3. **Codespaces 탭에서 `Create codespace on main` 클릭**  
+4. **Codespaces에서 자동으로 환경이 설정될 때까지 기다리기**  
+5. **터미널에서 필요한 의존성 설치 후 실행**  
+   - **2.3. 필요한 패키지 설치 단계부터 진행해주시면 됩니다.**
+---
+
 이 문서는 FastAPI를 사용하여 구현된 스마트스토어 FAQ 챗봇 API의 상세 내용을 설명합니다. 이 문서는 엔드포인트, 설정, 초기화 및 동작 방식을 포함합니다.
 
 ## 1. 기본 정보
@@ -69,6 +83,12 @@ python VectorPreparation.py
 
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8080
+```
+
+### 7. 브라우저로 이동
+
+```bash
+Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
 ```
 
 ## 3. FastAPI 애플리케이션(main.py)
