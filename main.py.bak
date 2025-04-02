@@ -1,0 +1,105 @@
+import pickle
+import os
+from fastapi import FastAPI, HTTPException, Request, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from openai import OpenAI
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+import logging
+from datetime import datetime
+from sentence_transformers import SentenceTransformer
+
+import pysqlite3
+import sys
+sys.modules['sqlite3'] = pysqlite3
+
+import chromadb
+# ChromaDB 데이터 저장 디렉토리 설정
+chroma_data_dir = "./chroma_data"
+# 컬렉션 이름 설정
+collection_name = "smartstore_faq"
+# ChromaDB 클라이언트 초기화
+chroma_client = chromadb.PersistentClient(path=chroma_data_dir)
+
+# ChromaDB 클라이언트 및 컬렉션 초기화"
+collection = chroma_client.get_collection(name=collection_name)
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# FastAPI 앱 초기화
+app = FastAPI()
+
+client = OpenAI()
+
+# 정적 파일 마운트
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# 템플릿 디렉토리 설정
+templates = Jinja2Templates(directory="templates")
+
+# 대화 기록 저장소
+conversation_history = {}
+
+# Sentence Transformer 모델 로드
+embedding_model = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+
+async def generate_response(question: str, user_id: str):
+    # RAG: 질문과 유사한 FAQ 검색
+    question_embedding = embedding_model.encode(question, convert_to_numpy=True).tolist()
+    results = collection.query(query_embeddings=[question_embedding], n_results=5)
+
+    if not results["documents"]:
+        return StreamingResponse(iter(["해당 질문에 대한 정보를 찾을 수 없습니다."]), media_type="text/event-stream")
+
+    context = "\n".join(results["documents"][0])
+
+    # 대화 기록 추가
+    conversation_history.setdefault(user_id, []).append({"role": "user", "content": question})
+
+    # LLM에 질문 및 검색된 FAQ 답변 제공
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a chatbot that answers questions based on the provided SmartStore FAQ.",
+        },
+        *conversation_history[user_id],
+        {"role": "assistant", "content": f"Here's the relevant information from the FAQ:\n{context}"},
+    ]
+
+    # LLM 답변 생성 (스트리밍)
+    stream = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=messages,
+        stream=True,
+    )
+
+    async def generate():
+        for chunk in stream:
+            if chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+                conversation_history[user_id].append(
+                    {"role": "assistant", "content": chunk.choices[0].delta.content}
+                )
+
+    return StreamingResponse(
+        generate(), 
+        media_type="text/event-stream",
+        headers={"Content-Type": "text/event-stream; charset=utf-8"}
+    )
+
+# 루트 경로 핸들러
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("chat.html", {"request": request})    
+
+@app.get("/chat/{user_id}")
+async def chat(user_id: str, question: str = Query(...)): # Query를 통해 질문을 받음.
+    if not question:
+        raise HTTPException(status_code=400, detail="Question is required.")
+
+    return await generate_response(question, user_id)
+    

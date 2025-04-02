@@ -1,0 +1,157 @@
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.chat-container {
+    width: 400px;
+    height: 600px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+.chat-box {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    border-bottom: none;
+    background-color: #f4f6f9;
+}
+
+.chat-input {
+    display: flex;
+    padding: 10px;
+}
+
+.chat-input input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+.chat-input button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.user-message, .bot-message {
+    padding: 10px 15px;
+    margin: 8px 0;
+    border-radius: 12px;
+    max-width: 70%;
+    word-wrap: break-word;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-message {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    align-self: flex-end;
+}
+
+.bot-message {
+    background-color: #f8f9fa;
+    color: #495057;
+    align-self: flex-start;
+}
+
+.follow-up-button {
+    background-color: #f1f3f4;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+}
+
+.follow-up-button:hover {
+    background-color: #e8eaed;
+}
+
+.follow-up-label {
+    font-size: 1em;
+    color: #343a40;
+}
+
+/* 마크다운 스타일 */
+.bot-message p,
+.bot-message h1,
+.bot-message h2,
+.bot-message h3,
+.bot-message code,
+.bot-message pre,
+.bot-message blockquote,
+.bot-message ul,
+.bot-message ol,
+.bot-message li,
+.bot-message a {
+    margin: 5px 0;
+}
+
+.bot-message h1,
+.bot-message h2,
+.bot-message h3 {
+    margin-top: 10px;
+}
+
+.bot-message code {
+    background-color: #f0f0f0;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.bot-message pre {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+.bot-message blockquote {
+    border-left: 3px solid #ccc;
+    padding-left: 10px;
+    color: #777;
+}
+
+.bot-message ul,
+.bot-message ol {
+    margin-left: -1em;
+}
+
+.bot-message a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.bot-message a:hover {
+    text-decoration: underline;
+}
